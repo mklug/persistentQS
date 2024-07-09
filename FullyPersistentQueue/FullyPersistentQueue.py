@@ -77,7 +77,14 @@ class FullyPersistentQueue:
         return len(self.len)
 
     def __iter__(self):
-        self._reverse
+
+        forward = []
+        head = self.F
+        while head is not None:
+            forward.append(head.val)
+            head = head.next
+
+        yield from reversed(forward)
         head = self.R
         while head is not None:
             yield head.val

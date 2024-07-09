@@ -116,6 +116,22 @@ class TestFullyPersistentQueueMethods(unittest.TestCase):
         with self.assertRaises(IndexError):
             q.dequeue()
 
+    def test_iter(self):
+        iter = [1, 2, 3]
+        q = FullyPersistentQueue([1, 2, 3])
+        for x, y in zip(q, iter):
+            self.assertEqual(x, y)
+
+        q = q.enqueue(4)
+        iter.append(4)
+        for x, y in zip(q, iter):
+            self.assertEqual(x, y)
+
+        _, q = q.dequeue()
+        iter = iter[1:]
+        for x, y in zip(q, iter):
+            self.assertEqual(x, y)
+
     def test_random(self):
         q_current = [1, 2, 3]
         q = FullyPersistentQueue(q_current)
