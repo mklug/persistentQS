@@ -28,6 +28,13 @@ class TestFullyPersistentQueueMethods(unittest.TestCase):
             current = new
         return head
 
+    def get_tail(head):
+        prev = None
+        while head is not None:
+            prev = head
+            head = head.next
+        return prev
+
     def test_reverse(self):
         tests = [[], [1], [1, 2], [1, 2, 3]]
         for test in tests:
@@ -47,10 +54,13 @@ class TestFullyPersistentQueueMethods(unittest.TestCase):
         self.assertEqual(TestFullyPersistentQueueMethods.to_list(head), [1])
 
     # Testing the queue.
+    def queue_to_list(q):
+        f = TestFullyPersistentQueueMethods.to_list(q.F)
+        r = TestFullyPersistentQueueMethods.to_list(q.R)
+        return r + f[::-1]
 
     def test_init_peek(self):
         q = FullyPersistentQueue([1, 2])
-        q.peek()
         self.assertEqual(q.peek(), 1)
 
     def test_init_enqueue(self):
@@ -61,7 +71,6 @@ class TestFullyPersistentQueueMethods(unittest.TestCase):
 
     def test_init_dequeue(self):
         q = FullyPersistentQueue([1, 2])
-
         self.assertEqual(q.F.val, 2)
         self.assertEqual(q.F.next.val, 1)
         assert q.R is None
@@ -86,19 +95,21 @@ class TestFullyPersistentQueueMethods(unittest.TestCase):
     def test_to_list1(self):
         init = [1, 2]
         q_init = FullyPersistentQueue(init)
-        self.assertEqual(q_init.to_list(), init)
+        self.assertEqual(
+            TestFullyPersistentQueueMethods.queue_to_list(q_init), init)
 
     def test_to_list2(self):
-        init = [1, 2, 3]
-        q_init = FullyPersistentQueue(init)
-        self.assertEqual(q_init.to_list(), init)
+        q_init = FullyPersistentQueue([1, 2, 3])
+        self.assertEqual(
+            TestFullyPersistentQueueMethods.queue_to_list(q_init), [1, 2, 3])
 
-        init.append(4)
-        q_enqueued = q_init.enqueue(4)
-        self.assertEqual(q_enqueued.to_list(), init)
+        q = q_init.enqueue(4)
+        self.assertEqual(
+            TestFullyPersistentQueueMethods.queue_to_list(q), [1, 2, 3, 4])
 
-        _, q = q_enqueued.dequeue()
-        self.assertEqual(q.to_list(), init[1:])
+        _, q = q.dequeue()
+        self.assertEqual(
+            TestFullyPersistentQueueMethods.queue_to_list(q), [2, 3, 4])
 
     def test_empty(self):
         q = FullyPersistentQueue()
@@ -111,12 +122,13 @@ class TestFullyPersistentQueueMethods(unittest.TestCase):
         lists = [q_current]
         queues = [q]
 
-        TRIALS = 1
+        TRIALS = 100
         # Enqueue
         for _ in range(TRIALS):
             x = random.randint(-100, 100)
             current_queue = random.choice(queues)
-            current_list = current_queue.to_list()
+            current_list = TestFullyPersistentQueueMethods.queue_to_list(
+                current_queue)
             current_list.append(x)
             lists.append(current_list)
             queues.append(current_queue.enqueue(x))
@@ -124,7 +136,8 @@ class TestFullyPersistentQueueMethods(unittest.TestCase):
         # Dequeue
         for _ in range(TRIALS):
             current_queue = random.choice(queues)
-            current_list = current_queue.to_list()
+            current_list = TestFullyPersistentQueueMethods.queue_to_list(
+                current_queue)
             if len(current_list) > 0:
                 current_list = current_list[1:]
                 _, new = current_queue.dequeue()
@@ -132,7 +145,8 @@ class TestFullyPersistentQueueMethods(unittest.TestCase):
                 queues.append(new)
 
         for list, q in zip(lists, queues):
-            self.assertEqual(list, q.to_list())
+            self.assertEqual(
+                list, TestFullyPersistentQueueMethods.queue_to_list(q))
 
 
 if __name__ == '__main__':
